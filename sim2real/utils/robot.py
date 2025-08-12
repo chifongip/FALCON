@@ -22,6 +22,8 @@ class Robot:
         self.MOTOR_POS_LOWER_LIMIT_LIST = config["motor_pos_lower_limit_list"]
         self.MOTOR_POS_UPPER_LIMIT_LIST = config["motor_pos_upper_limit_list"]
 
+        self.USE_SIM = config.get("USE_SIM", True)
+        self.REALJOINT2MOTOR = config.get("REALJOINT2MOTOR", None)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Robot")

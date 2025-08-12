@@ -46,7 +46,8 @@ class UnitreeCommandSender(BasicCommandSender):
         self.low_cmd.level_flag = 0xFF
         self.low_cmd.gpio = 0
         
-        for i in range(self.robot.NUM_MOTORS):
+        # for i in range(self.robot.NUM_MOTORS):
+        for i in range(29):
             if self.is_weak_motor(i):
                 self.low_cmd.motor_cmd[i].mode = 0x01
             else:
@@ -60,6 +61,7 @@ class UnitreeCommandSender(BasicCommandSender):
             # Set mode for g1/h1-2
             if (
                 robot_type == "g1_29dof"
+                or robot_type == "g1_23dof"
                 or robot_type == "h1-2_21dof"
                 or robot_type == "h1-2_27dof"
             ):

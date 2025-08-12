@@ -1,5 +1,6 @@
 import os
 import sys
+import atexit
 import time
 
 import numpy as np
@@ -14,7 +15,7 @@ from sim2real.rl_policy.dec_loco.dec_loco import DecLocomotionPolicy
 
 from termcolor import colored
 from sim2real.utils.arm_ik.robot_arm_ik_g1_23dof import G1_29_ArmIK_NoWrists
-
+from sim2real.utils.arm_ik.robot_arm_ik_g1_23dof_native import G1_23_ArmIK_NoWrists
 
 class LocoManipPolicy(DecLocomotionPolicy):
     def __init__(
@@ -41,6 +42,10 @@ class LocoManipPolicy(DecLocomotionPolicy):
     def init_upper_body_controller(self):
         if self.config["ROBOT_TYPE"] == "g1_29dof":
             self.upper_body_controller = G1_29_ArmIK_NoWrists(
+                Unit_Test=False, Visualization=False, robot_config=self.config
+            )
+        elif self.config["ROBOT_TYPE"] == "g1_23dof":
+            self.upper_body_controller = G1_23_ArmIK_NoWrists(
                 Unit_Test=False, Visualization=False, robot_config=self.config
             )
         else:
@@ -113,12 +118,16 @@ class LocoManipPolicy(DecLocomotionPolicy):
                 self.EE_efrc_R,
             )
             arm_reduced_joint_indices = [0, 1, 2, 3, 7, 8, 9, 10]
+            if self.config["ROBOT_TYPE"] == "g1_23dof":
+                arm_reduced_joint_indices = [0, 1, 2, 3, 5, 6, 7, 8]
             for i, idx in enumerate(arm_reduced_joint_indices):
                 self.ref_upper_dof_pos[0, idx] = upper_body_qpos[i]
             # Zero out wrist joints
-            wrist_joint_indices = [19, 20, 21, 26, 27, 28]
-            for idx in wrist_joint_indices:
-                self.ref_upper_dof_pos[0, idx - 15] = 0.0
+            wrist_joint_indices = [4, 5, 6, 11, 12, 13]
+            if self.config["ROBOT_TYPE"] == "g1_23dof":
+                wrist_joint_indices = [4, 9]
+            for i, idx in enumerate (wrist_joint_indices):
+                self.ref_upper_dof_pos[0, idx] = 0.0
 
         # Get policy action
         scaled_policy_action = self.rl_inference(robot_state_data)
@@ -270,20 +279,27 @@ class LocoManipPolicy(DecLocomotionPolicy):
         print(f"Waist dofs command: {self.waist_dofs_command}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Robot")
-    parser.add_argument("--config", type=str, default="config/g1/g1_29dof.yaml", help="config file")
-    parser.add_argument("--model_path", type=str, help="path to the ONNX model file")
-    args = parser.parse_args()
+    try: 
+        parser = argparse.ArgumentParser(description="Robot")
+        parser.add_argument("--config", type=str, default="config/g1/g1_29dof.yaml", help="config file")
+        parser.add_argument("--model_path", type=str, help="path to the ONNX model file")
+        args = parser.parse_args()
 
-    with open(args.config) as file:
-        config = yaml.safe_load(file)
+        with open(args.config) as file:
+            config = yaml.safe_load(file)
 
-    # Use command line model_path if provided, otherwise use config model_path
-    model_path = args.model_path if args.model_path else config.get("model_path")
-    if not model_path:
-        raise ValueError("model_path must be provided either via --model_path argument or in config file")
+        # Use command line model_path if provided, otherwise use config model_path
+        model_path = args.model_path if args.model_path else config.get("model_path")
+        if not model_path:
+            raise ValueError("model_path must be provided either via --model_path argument or in config file")
 
-    policy = LocoManipPolicy(
-        config=config, model_path=model_path, rl_rate=50, policy_action_scale=0.25
-    )
-    policy.run()
+        policy = LocoManipPolicy(
+            config=config, model_path=model_path, rl_rate=50, policy_action_scale=0.25
+        )
+        policy.run()
+    except:
+        pass
+    finally:
+        def reset_terminal():
+            os.system('reset')
+        atexit.register(reset_terminal)

@@ -51,6 +51,8 @@ class UnitreeStateProcessor(BasicStateProcessor):
         """Extract joint data from Unitree state message."""
         for i in range(self.num_dof):
             motor_idx = self.robot.JOINT2MOTOR[i]
+            if not self.robot.USE_SIM:
+                motor_idx = self.robot.REALJOINT2MOTOR[i]
             self.q[7 + i] = robot_joint_state[motor_idx].q
             self.dq[6 + i] = robot_joint_state[motor_idx].dq
             self.tau_est[6 + i] = robot_joint_state[motor_idx].tau_est

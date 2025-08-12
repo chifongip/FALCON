@@ -49,7 +49,7 @@ class BasicCommandSender(ABC):
         default_q = self.robot.DEFAULT_MOTOR_ANGLES
         
         if joint_id == -1 or self.no_action:
-            motor_cmd.q = default_q[motor_id]
+            motor_cmd.q = default_q[joint_id]
             motor_cmd.dq = 0.0
             motor_cmd.tau = 0.0
             motor_cmd.kp = 0.0
@@ -58,14 +58,18 @@ class BasicCommandSender(ABC):
             motor_cmd.q = cmd_q[joint_id]
             motor_cmd.dq = cmd_dq[joint_id]
             motor_cmd.tau = cmd_tau[joint_id]
-            motor_cmd.kp = self.robot.MOTOR_KP[motor_id] * self.kp_level
-            motor_cmd.kd = self.robot.MOTOR_KD[motor_id] * self.kd_level
+            motor_cmd.kp = self.robot.MOTOR_KP[joint_id] * self.kp_level
+            motor_cmd.kd = self.robot.MOTOR_KD[joint_id] * self.kd_level
+            # print(f"Motor {motor_id} command: q={motor_cmd.q}, dq={motor_cmd.dq}, tau={motor_cmd.tau}, kp={motor_cmd.kp}, kd={motor_cmd.kd}")
     
     def _fill_motor_commands(self, motor_cmd, cmd_q, cmd_dq, cmd_tau):
         """Fill motor commands for all motors."""
         joint2motor = self.robot.JOINT2MOTOR
         motor2joint = self.robot.MOTOR2JOINT
-        
+
+        if not self.robot.USE_SIM:
+            joint2motor = self.robot.REALJOINT2MOTOR
+
         for i in range(self.robot.NUM_MOTORS):
             m_id = joint2motor[i]
             j_id = motor2joint[i]
