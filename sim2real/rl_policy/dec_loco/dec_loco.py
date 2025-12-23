@@ -55,13 +55,20 @@ class DecLocomotionPolicy(BasePolicy):
         
         # Locomotion-specific commands
         if keycode in ["w", "s", "a", "d"]:
+            if self.stand_command[0, 0] == 0:
+                self._handle_stand_command()
             self._handle_velocity_control(keycode)
         elif keycode in ["q", "e"]:
+            if self.stand_command[0, 0] == 0:
+                self._handle_stand_command()
             self._handle_angular_velocity_control(keycode)
         elif keycode == "=":
             self._handle_stand_command()
         elif keycode == "z":
             self._handle_zero_velocity()
+            time.sleep(0.5)  # Debounce delay
+            if self.stand_command[0, 0] == 1:
+                self._handle_stand_command()
             
         self._print_control_status()
 
@@ -92,6 +99,9 @@ class DecLocomotionPolicy(BasePolicy):
     
     def _handle_angular_velocity_control(self, keycode):
         """Handle angular velocity control."""
+        if not self.stand_command[0, 0]:
+            return
+        
         if keycode == "q":
             self.ang_vel_command[0, 0] -= 0.1
         elif keycode == "e":

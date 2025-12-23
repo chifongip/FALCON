@@ -20,7 +20,8 @@ class PPOActor(nn.Module):
 
         self.actor_module = BaseModule(obs_dim_dict, module_config_dict)
 
-        self.num_actions = {'lower_body': 15, 'upper_body': 14}  # TODO: Hardcode
+        # self.num_actions = {'lower_body': 15, 'upper_body': 14}  # TODO: Hardcode
+        self.num_actions = {'lower_body': 13, 'upper_body': 10}
         # Action noise
         if isinstance(init_noise_std, dict) or isinstance(init_noise_std, DictConfig):
             std_list = []

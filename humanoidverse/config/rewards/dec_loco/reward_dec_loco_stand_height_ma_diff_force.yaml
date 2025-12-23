@@ -25,7 +25,7 @@ rewards:
       penalty_lower_body_dof_vel: -1.0e-3
       penalty_lower_body_dof_acc: -2.5e-7
       penalty_lower_body_action_rate: -0.1 # -0.5
-      # penalty_feet_contact_forces: -0.01
+      penalty_feet_contact_forces: -0.01
       # penalty_stumble: -10.0
       # penalty_slippage: -1.0
       penalty_contact_no_vel: -0.2 # -0.2
@@ -77,6 +77,9 @@ rewards:
       # penalty_root_acc_upper_body: -1e-4
       limits_upper_body_dof_vel: -5.0
       limits_upper_body_torque: -0.1
+
+      penalty_horse_stance: -1.0
+      penalty_stance_lower_body_dofs: -1.0
   reward_groups:
     lower_body: [
       "tracking_lin_vel_x",
@@ -105,7 +108,7 @@ rewards:
       "termination",
       "penalty_feet_height",
       "penalty_feet_swing_height",
-      # "penalty_feet_contact_forces",
+      "penalty_feet_contact_forces",
       "feet_heading_alignment",
       "penalty_close_feet_xy",
       "penalty_hip_pos",
@@ -124,7 +127,9 @@ rewards:
       "penalty_shift_in_zero_command",
       "penalty_ang_shift_in_zero_command",
       # "penalty_root_acc_lower_body",
-      # "penalty_stance_contact_no_ang_vel"
+      # "penalty_stance_contact_no_ang_vel",
+      "penalty_horse_stance",
+      "penalty_stance_lower_body_dofs",
       ]
     upper_body: [
       "tracking_upper_body_dofs",
@@ -249,9 +254,11 @@ rewards:
     # "penalty_stance_tap_feet",
     # "penalty_stance_root",
     # "penalty_stance_symmetry",
-    # "penalty_shift_in_zero_command",
-    # "penalty_ang_shift_in_zero_command",
+    "penalty_shift_in_zero_command",
+    "penalty_ang_shift_in_zero_command",
     # "penalty_ee_lin_acc",
     # "penalty_ee_ang_acc",
+    "penalty_horse_stance",
+    "penalty_stance_lower_body_dofs",
   ]
 

@@ -1,9 +1,11 @@
 import torch
+import torch.nn.functional as F
 import torch.nn as nn
 import torch.optim as optim
 
 from humanoidverse.agents.modules.ppo_modules import PPOActor, PPOCritic
 from humanoidverse.agents.modules.data_utils import RolloutStorage
+from humanoidverse.agents.modules.augmentation_utils import SymmetryUtils
 from humanoidverse.envs.base_task.base_task import BaseTask
 from humanoidverse.agents.callbacks.base_callback import RL_EvalCallback
 from humanoidverse.utils.average_meters import TensorAverageMeterDict
@@ -73,6 +75,14 @@ class PPOMultiActorCritic(PPO):
         self.num_act_upper_body = self.env.config.robot.upper_body_actions_dim
         self.num_act = {'lower_body': self.num_act_lower_body, 'upper_body': self.num_act_upper_body}
 
+        self.use_symmetry = self.config.use_symmetry
+        self.symmetry_actor_coef = self.config.symmetry_actor_coef
+        self.symmetry_critic_coef = self.config.symmetry_critic_coef
+        logger.info(f"Using symmetry augmentation: {self.use_symmetry}, symmetry actor coef: {self.symmetry_actor_coef}, symmetry critic coef: {self.symmetry_critic_coef}")
+
+        self.actor_obs_keys = ['actor_obs'] # TODO: Get from config?
+        self.critic_obs_keys = ['critic_obs']
+
     def _setup_models_and_optimizer(self):
         self.actors = {}
         self.critics = {}
@@ -91,6 +101,10 @@ class PPOMultiActorCritic(PPO):
                                           self.config.module_dict.critic).to(self.device)
             self.actor_learning_rates[key] = self.actor_learning_rate
             self.critic_learning_rates[key] = self.critic_learning_rate
+
+        if self.use_symmetry:
+            self.symmetry_utils = SymmetryUtils(self.env)
+
         self.actor_optimizers = {}
         self.critic_optimizers = {}
         for key in self.keys:
@@ -350,10 +364,39 @@ class PPOMultiActorCritic(PPO):
         old_mu_batch = policy_state_dict['action_mean' + '_' + key]
         old_sigma_batch = policy_state_dict['action_sigma' + '_' + key]
 
-        self.actors[key].act(policy_state_dict["actor_obs"])
+        # Add symmetry augmentation
+        original_batch_size = actions_batch.shape[0]
+        if self.use_symmetry:
+            actor_obs = self.symmetry_utils.augment_observations(
+                obs=policy_state_dict["actor_obs"],
+                env=self.env,
+                obs_list=self.actor_obs_keys,
+            )
+            critic_obs = self.symmetry_utils.augment_observations(
+                obs=policy_state_dict["critic_obs"],
+                env=self.env,
+                obs_list=self.critic_obs_keys,
+            )
+            actions_batch = self.symmetry_utils.augment_actions(
+                actions=actions_batch,
+            )
+            num_aug = int(actor_obs.shape[0] / original_batch_size)
+            target_values_batch = target_values_batch.repeat(num_aug, 1)
+            advantages_batch = advantages_batch.repeat(num_aug, 1)
+            returns_batch = returns_batch.repeat(num_aug, 1)
+            old_actions_log_prob_batch = old_actions_log_prob_batch.repeat(num_aug, 1)
+            old_mu_batch = old_mu_batch.repeat(num_aug, 1)
+            old_sigma_batch = old_sigma_batch.repeat(num_aug, 1)
+        else:
+            actor_obs = policy_state_dict["actor_obs"]
+            critic_obs = policy_state_dict["critic_obs"]
+
+        # self.actors[key].act(policy_state_dict["actor_obs"])  # original
+        self.actors[key].act(actor_obs)
         actions_log_prob_batch = self.actors[key].get_actions_log_prob(actions_batch)
         # value_batch = self.critic.evaluate(policy_state_dict["critic_obs"])
-        value_batch = self.critics[key].evaluate(policy_state_dict["critic_obs"])
+        # value_batch = self.critics[key].evaluate(policy_state_dict["critic_obs"]) # original
+        value_batch = self.critics[key].evaluate(critic_obs)
         mu_batch = self.actors[key].action_mean
         sigma_batch = self.actors[key].action_std
         entropy_batch = self.actors[key].entropy
@@ -395,10 +438,38 @@ class PPOMultiActorCritic(PPO):
         else:
             value_loss = (returns_batch - value_batch).pow(2).mean()
 
+        # Add symmetry loss
+        if self.use_symmetry:
+            mean_actions_batch = self.actors[key].act_inference(actor_obs.detach().clone())
+            mean_actions_for_original_batch, mean_actions_for_symmetry_batch = (
+                mean_actions_batch[:original_batch_size],
+                mean_actions_batch[original_batch_size:],
+            )
+            mean_symmetry_actions_batch = self.symmetry_utils.augment_actions(
+                actions=mean_actions_for_original_batch,
+            )[original_batch_size:]
+            symmetry_actor_loss = F.mse_loss(
+                mean_actions_for_symmetry_batch,
+                mean_symmetry_actions_batch,
+            )
+
+            # Symmetry critic loss
+            symmetry_critic_loss = F.mse_loss(
+                value_batch[:original_batch_size],
+                value_batch[original_batch_size:],
+            )
+        else:
+            symmetry_actor_loss = torch.tensor(0.0, device=self.device)
+            symmetry_critic_loss = torch.tensor(0.0, device=self.device)
+
         entropy_loss = entropy_batch.mean()
-        actor_loss = surrogate_loss - self.entropy_coef * entropy_loss
-        
-        critic_loss = self.value_loss_coef * value_loss
+        actor_loss = (
+            surrogate_loss
+            - self.entropy_coef * entropy_loss
+            + self.symmetry_actor_coef * symmetry_actor_loss
+        )
+
+        critic_loss = self.value_loss_coef * value_loss + self.symmetry_critic_coef * symmetry_critic_loss
         
         return actor_loss, critic_loss, value_loss, surrogate_loss, entropy_loss, kl_mean
 
@@ -428,6 +499,9 @@ class PPOMultiActorCritic(PPO):
         self.tot_timesteps += self.num_steps_per_env * self.env.num_envs
         self.tot_time += log_dict['collection_time'] + log_dict['learn_time']
         iteration_time = log_dict['collection_time'] + log_dict['learn_time']
+
+        if log_dict['it'] % self.logging_interval != 0:  # Check report frequency
+            return
 
         ep_string = f''
         if log_dict['ep_infos']:

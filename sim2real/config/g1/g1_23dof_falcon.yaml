@@ -11,7 +11,17 @@ ASSET_FILE: "../humanoidverse/data/robots/g1/g1_23dof_rev_1_0.urdf" # Robot Asse
 # model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon/20250809_133943-g1_23dof_falcon-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_15000.onnx"
 
 # (Good Step)
-model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon/20250810_232000-g1_23dof_falcon-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_20000.onnx"
+# model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon/20250810_232000-g1_23dof_falcon-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_20000.onnx"
+
+# model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon/20250814_100323-g1_23dof_falcon-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_10000.onnx"
+
+# (Add shift penalty)
+# model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon/20251125_130142-g1_23dof_falcon-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_15000.onnx"
+
+# model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon_test/20251219_165947-g1_23dof_falcon_test-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_40000.onnx"
+# model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon_test/20251222_114527-g1_23dof_falcon_test-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_45000.onnx"
+
+model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon_test/test/model/model_37000.onnx"
 
 SDK_TYPE: "unitree" # SDK type, "unitree", "booster"
 MOTOR_TYPE: "serial" # Motor type, "serial" or "parallel"
@@ -19,7 +29,7 @@ MOTOR_TYPE: "serial" # Motor type, "serial" or "parallel"
 ## SIM
 DOMAIN_ID: 0 # Domain id
 INTERFACE: "lo" # in simulation, lo0 for mac, lo for linux
-USE_SIM: True # Use simulation or real robot
+USE_SIM: True # Use simulation or real robot, True, False
 # sim: lo, real: enp58s0
 
 FREE_BASE: True
@@ -38,10 +48,10 @@ JOYSTICK_DEVICE: 0 # Joystick number
 VISUALIZE_PIN: False
 VISUALIZE_FORCES: False
 
-residual_upper_body_action: True # Whether to use residual upper body action for balancing
-use_upper_body_controller: True # Whether to use upper body controller
+residual_upper_body_action: False # Whether to use residual upper body action for balancing
+use_upper_body_controller: False # Whether to use upper body controller
 
-GAIT_PERIOD: 0.9 # Gait period in seconds
+GAIT_PERIOD: 1.0 # Gait period in seconds
 
 DESIRED_BASE_HEIGHT: 0.75 # Desired base height
 
@@ -230,6 +240,8 @@ obs_dict: {
     dof_pos,
     dof_vel,
     actions,
+    sin_phase,
+    cos_phase,
   ],
 }
 history_length_dict: {
@@ -249,6 +261,8 @@ obs_dims: {
             dof_vel: 23,
             actions: 23, # lower body actions
             phase_time: 1,
+            sin_phase: 1,
+            cos_phase: 1,
           }
 obs_scales: {
     base_lin_vel: 2.0,
@@ -265,4 +279,6 @@ obs_scales: {
     history: 1.0,
     actions: 1.0,
     phase_time: 1.0,
+    sin_phase: 1.0,
+    cos_phase: 1.0,
   }

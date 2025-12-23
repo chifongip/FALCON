@@ -609,7 +609,19 @@ class LeggedRobotDecoupledLocomotionStanceHeightWBCForce(LeggedRobotDecoupledLoc
                                                      self.config.rewards.force_scale_max)
 
     ########################### FEET REWARDS ###########################
-    
+
+    def _reward_penalty_horse_stance(self):
+        # Penalize wide lateral (left-right) distance between feet in pelvis frame
+        feet_diff = torch.abs(self.simulator._rigid_body_pos[:, self.feet_indices[0], :3] - self.simulator._rigid_body_pos[:, self.feet_indices[1], :3])
+        pelvis_quat = self.simulator._rigid_body_rot[:, self.pelvis_id]
+        projected_feet_diff = quat_rotate_inverse(pelvis_quat, feet_diff)
+        return torch.relu(torch.abs(projected_feet_diff[:, 1]) - 0.3) * (1.0 - self.commands[:, 4]) # only penalize when separation exceeds a natural threshold
+
+    def _reward_penalty_stance_lower_body_dofs(self):
+        # Penalty the difference between the lower body dof pos and the reference 
+        lower_body_dofs_error =  torch.sum(torch.square(self.simulator.dof_pos[:, self.lower_dof_indices] - self.default_dof_pos[:, self.lower_dof_indices]), dim=1)
+        return lower_body_dofs_error * (1 - self.commands[:, 4])  # only apply the lower body dof penalty if stance
+
     def _reward_tracking_upper_body_dofs(self):
         # Reward the difference between the waist dof pos and the reference
         upper_body_pos = self.simulator.dof_pos[:, self.upper_dof_indices]
