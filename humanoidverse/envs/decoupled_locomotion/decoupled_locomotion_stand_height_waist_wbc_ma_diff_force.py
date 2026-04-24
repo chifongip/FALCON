@@ -615,7 +615,7 @@ class LeggedRobotDecoupledLocomotionStanceHeightWBCForce(LeggedRobotDecoupledLoc
         feet_diff = torch.abs(self.simulator._rigid_body_pos[:, self.feet_indices[0], :3] - self.simulator._rigid_body_pos[:, self.feet_indices[1], :3])
         pelvis_quat = self.simulator._rigid_body_rot[:, self.pelvis_id]
         projected_feet_diff = quat_rotate_inverse(pelvis_quat, feet_diff)
-        return torch.relu(torch.abs(projected_feet_diff[:, 1]) - 0.3) * (1.0 - self.commands[:, 4]) # only penalize when separation exceeds a natural threshold
+        return torch.relu(torch.abs(projected_feet_diff[:, 1]) - self.config.rewards.horse_stance_threshold) * (1.0 - self.commands[:, 4]) # only penalize when separation exceeds a natural threshold
 
     def _reward_penalty_stance_lower_body_dofs(self):
         # Penalty the difference between the lower body dof pos and the reference 

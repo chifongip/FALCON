@@ -57,11 +57,8 @@ class LeggedRobotLocomotion(LeggedRobotBase):
         self.leg_phase = torch.cat([self.phase_left.unsqueeze(1), self.phase_right.unsqueeze(1)], dim=-1)
 
         # Initialize the gait period
-        if hasattr(self.config.rewards, "gait_period"):
-            if not self.config.rewards.gait_period:
-                self.T = self.config.rewards.gait_period # gait period in seconds # gait period in seconds
-            else:
-                self.T = 1. # gait period in seconds
+        if hasattr(self.config.rewards, "gait_period") and self.config.rewards.gait_period is not None:
+            self.T = self.config.rewards.gait_period # gait period in seconds
         else:
             self.T = 1.
         
