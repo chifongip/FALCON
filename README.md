@@ -2,7 +2,12 @@
 
 <div align="center">
 
-<!-- Robotics: Science and Systems (RSS) 2025 -->
+Learning for Dynamics & Control Conference (L4DC) 2026
+<b><span style="color:#e63946;">Oral</span></b>
+
+</div>
+
+<div align="center">
 
 [[Website]](https://lecar-lab.github.io/falcon-humanoid/)
 [[Arxiv]](https://lecar-lab.github.io/falcon-humanoid/)
@@ -24,8 +29,6 @@
 - [x] Release training code
 - [x] Release sim2sim code
 - [x] Release sim2real code
-- [ ] Compatible with IsaacSim
-- [ ] Compatible with Genesis
 
 
 # Installation
