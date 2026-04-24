@@ -4,24 +4,7 @@ ASSET_ROOT: "../humanoidverse/data/robots/g1" # Robot Asset Root
 ASSET_FILE: "../humanoidverse/data/robots/g1/g1_23dof_rev_1_0.urdf" # Robot Asset File"
 
 # Model path for the trained policy
-# (Good Base Model)
-# model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon/20250810_232131-g1_23dof_falcon-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_10000.onnx"
-
-# (Good Torso)
-# model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon/20250809_133943-g1_23dof_falcon-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_15000.onnx"
-
-# (Good Step)
-# model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon/20250810_232000-g1_23dof_falcon-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_20000.onnx"
-
-# model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon/20250814_100323-g1_23dof_falcon-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_10000.onnx"
-
-# (Add shift penalty)
-# model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon/20251125_130142-g1_23dof_falcon-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_15000.onnx"
-
-# model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon_test/20251219_165947-g1_23dof_falcon_test-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_40000.onnx"
-# model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon_test/20251222_114527-g1_23dof_falcon_test-decoupled_locomotion-g1_23dof_rev_1_0/exported/model_45000.onnx"
-
-model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon_test/test/model/model_37000.onnx"
+model_path: "/home/ubuntu/FALCON/logs/g1_23dof_falcon_test/g1_23dof.onnx"
 
 SDK_TYPE: "unitree" # SDK type, "unitree", "booster"
 MOTOR_TYPE: "serial" # Motor type, "serial" or "parallel"
@@ -114,28 +97,29 @@ MOTOR_KD: [
   2.0, 1.0, 0.4, 1.0, 0.2
 ]
 
-dof_names: ['left_hip_yaw_joint', 'left_hip_roll_joint', 'left_hip_pitch_joint', 'left_knee_joint', 'left_ankle_pitch_joint', 'left_ankle_roll_joint',
-            'right_hip_yaw_joint', 'right_hip_roll_joint', 'right_hip_pitch_joint', 'right_knee_joint', 'right_ankle_pitch_joint', 'right_ankle_roll_joint',
+dof_names: ['left_hip_pitch_joint', 'left_hip_roll_joint', 'left_hip_yaw_joint', 'left_knee_joint', 'left_ankle_pitch_joint', 'left_ankle_roll_joint',
+            'right_hip_pitch_joint', 'right_hip_roll_joint', 'right_hip_yaw_joint', 'right_knee_joint', 'right_ankle_pitch_joint', 'right_ankle_roll_joint',
             'waist_yaw_joint',
             'left_shoulder_pitch_joint', 'left_shoulder_roll_joint', 'left_shoulder_yaw_joint', 'left_elbow_joint', 'left_wrist_roll_joint',
             'right_shoulder_pitch_joint', 'right_shoulder_roll_joint', 'right_shoulder_yaw_joint', 'right_elbow_joint', 'right_wrist_roll_joint']
 dof_names_upper_body: ['left_shoulder_pitch_joint', 'left_shoulder_roll_joint', 'left_shoulder_yaw_joint', 'left_elbow_joint', 'left_wrist_roll_joint',
-                      'right_shoulder_pitch_joint', 'right_shoulder_roll_joint', 'right_shoulder_yaw_joint', 'right_elbow_joint', 'right_wrist_roll_joint']
-dof_names_lower_body: ['left_hip_yaw_joint', 'left_hip_roll_joint', 'left_hip_pitch_joint', 'left_knee_joint', 'left_ankle_pitch_joint', 'left_ankle_roll_joint',
-                      'right_hip_yaw_joint', 'right_hip_roll_joint', 'right_hip_pitch_joint', 'right_knee_joint', 'right_ankle_pitch_joint', 'right_ankle_roll_joint',
-                      'waist_yaw_joint']
+                       'right_shoulder_pitch_joint', 'right_shoulder_roll_joint', 'right_shoulder_yaw_joint', 'right_elbow_joint', 'right_wrist_roll_joint']
+dof_names_lower_body: ['left_hip_pitch_joint', 'left_hip_roll_joint', 'left_hip_yaw_joint', 'left_knee_joint', 'left_ankle_pitch_joint', 'left_ankle_roll_joint',
+                       'right_hip_pitch_joint', 'right_hip_roll_joint', 'right_hip_yaw_joint', 'right_knee_joint', 'right_ankle_pitch_joint', 'right_ankle_roll_joint',
+                       'waist_yaw_joint']
 left_hand_link_name: "left_wrist_roll_rubber_hand"
 right_hand_link_name: "right_wrist_roll_rubber_hand"
+
 WeakMotorJointIndex:
-  left_hip_yaw_joint: 0
+  left_hip_pitch_joint: 0
   left_hip_roll_joint: 1
-  left_hip_pitch_joint: 2
+  left_hip_yaw_joint: 2
   left_knee_joint: 3
   left_ankle_pitch_joint: 4
   left_ankle_roll_joint: 5
-  right_hip_yaw_joint: 6
+  right_hip_pitch_joint: 6
   right_hip_roll_joint: 7
-  right_hip_pitch_joint: 8
+  right_hip_yaw_joint: 8
   right_knee_joint: 9
   right_ankle_pitch_joint: 10
   right_ankle_roll_joint: 11

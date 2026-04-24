@@ -66,7 +66,7 @@ class DecLocomotionPolicy(BasePolicy):
             self._handle_stand_command()
         elif keycode == "z":
             self._handle_zero_velocity()
-            time.sleep(0.5)  # Debounce delay
+            time.sleep(1.0)  # Debounce delay
             if self.stand_command[0, 0] == 1:
                 self._handle_stand_command()
             
