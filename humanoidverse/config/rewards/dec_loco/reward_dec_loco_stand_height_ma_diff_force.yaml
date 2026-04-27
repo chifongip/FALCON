@@ -8,6 +8,7 @@ rewards:
   set_reward_date: 20250405
   only_positive_rewards: False
   reward_scales:
+      gait_period: 1.0
       tracking_lin_vel_x: 2.0
       tracking_lin_vel_y: 1.5
       tracking_ang_vel: 4.0
@@ -82,6 +83,7 @@ rewards:
       penalty_stance_lower_body_dofs: -1.0
   reward_groups:
     lower_body: [
+      "gait_period",
       "tracking_lin_vel_x",
       "tracking_lin_vel_y",
       "tracking_ang_vel",
